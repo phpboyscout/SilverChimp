@@ -12,6 +12,7 @@ $lang['en_US']['SilverChimp'] = array(
     'DISABLEGROUPS'    => 'Disable groups from appearing on the frontend',
     'HIDDENGROUP'      => ' (Hidden by MailChimp)',
     'UPDATEEXISTING'   => 'Allow a subscriber to update an existing subscription',
+    'BUTTONTEXT'       => 'What text do you want to appear on the Subscribe button',
 
     'ADDRESS1'        => 'Street Address',
     'ADDRESS2'        => 'Address Line 2',

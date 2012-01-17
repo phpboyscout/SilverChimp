@@ -12,17 +12,19 @@ class SilverChimpSubscriptionPage extends Page {
      * @var array
      */
     static $db = array(
-        'ListID'            => 'Varchar(50)',    // list_unique_id
-        'SubscribeSuccess' => 'HTMLText',
-        'DisableGroupSelection' => 'Boolean',    // prevent frontend selection of groups
-        'AllowUpdateExisting' => 'Boolean',      // Allow a subscriber to update an existing subscription overrides default in SilverChimpSettings
+        'ListID'                 => 'Varchar(50)',    // list_unique_id
+        'SubscribeSuccess'       => 'HTMLText',
+        'DisableGroupSelection'  => 'Boolean',    // prevent frontend selection of groups
+        'AllowUpdateExisting'    => 'Boolean',      // Allow a subscriber to update an existing subscription overrides default in SilverChimpSettings
         'DefaultGroupSelections' => 'Text',      // serialised array containing default group selections
+        'SubscribeButtonText'    => 'Text', 
     );
     
     static $defaults = array(
         "DisableGroupSelection"   => 0,
         "AllowUpdateExisting"     => 0,
         "DefaultGroupSelections"  => 'a:0:{}',    // use serialize to prevent dependancy for json support 
+        "SubscribeButtonText"     => 'Subscribe',
     );
 
     /**
@@ -54,6 +56,7 @@ class SilverChimpSubscriptionPage extends Page {
                 new DropdownField('ListID', _t('SilverChimp.LISTLABEL', 'Select the list you wish to use'),$listSource),
                 new OptionsetField("DisableGroupSelection", _t('SilverChimp.DISABLEGROUPS', "Disable groups from appearing on the frontend"), array(0 => 'Enable', 1 => 'Disable')),
                 new OptionsetField("AllowUpdateExisting", _t('SilverChimp.UPDATEEXISTING', "Allow a subscriber to update an existing subscription"), array(0 => 'No', 1 => 'Yes'), SilverChimpSettings::$update_existing),
+                new TextField('SubscribeButtonText', _t('SilverChimp.BUTTONTEXT', "What text do you want to appear on the Subscribe button")),
                 new LiteralField("ChimpFieldsInto", $message),
                 new HtmlEditorField('SubscribeSuccess', _t('SilverChimp.SUBSCRIBESUCCESS', 'Enter something to display when a subscription has been sucessful'))
                 
@@ -210,7 +213,7 @@ class SilverChimpSubscriptionPage_Controller extends Page_Controller {
         
         $form = new Form($this, 'Form',
             new FieldSet($fields),
-            new FieldSet(new FormAction('SubscribeAction', 'Subscribe')),
+            new FieldSet(new FormAction('SubscribeAction', $this-SubscribeButtonText)),
             new RequiredFields($required)
         );
 
