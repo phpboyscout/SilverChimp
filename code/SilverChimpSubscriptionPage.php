@@ -213,7 +213,7 @@ class SilverChimpSubscriptionPage_Controller extends Page_Controller {
         
         $form = new Form($this, 'Form',
             new FieldSet($fields),
-            new FieldSet(new FormAction('SubscribeAction', $this-SubscribeButtonText)),
+            new FieldSet(new FormAction('SubscribeAction', $this->SubscribeButtonText)),
             new RequiredFields($required)
         );
 
