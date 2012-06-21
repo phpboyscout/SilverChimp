@@ -127,7 +127,7 @@ class SilverChimpSubscriptionPage extends Page {
     protected function onBeforeWrite()
     {
         $api_key = SilverChimpSettings::$api_key;
-        if ($api_key && strlen($api_key)) {
+        if ($api_key && strlen($api_key) && $this->ListID) {
             $api = new MCAPI($api_key, SilverChimpSettings::$secure_connection);
 
             $defaults = array();
