@@ -1,6 +1,15 @@
 en:
   SilverChimp:
     APIKEY: 'MailChimp API Key'
+    APIKEYNOTSET: 'You must configure your MailChimp API Key in site settings'
+    SENDEMAILAS: 'Send Emails As',
+    SENDTYPEHTML: 'HTML'
+    SENDTYPETEXT: 'Text'
+    SECURECONNECTIONSETTING: 'Secure Connection : Shoud a secure connection be used when communicating communicating with MailChimp'
+    DOUBLEOPTINSETTING: 'Double Opt In : If enabled a double opt-in confirmation message is sent to the subscriber'
+    SENDWELCOMESETTING: 'Send Welcome : If Double Opt In is disabled and this is setting enabled, we will send the selected lists Welcome Email on successful subscriptions- this will *not* fire if when updating an existing subscriber. If double_optin is enabled, this setting has no effect.'
+    UPDATEEXISTINGSETTING: 'Update Existing : If enabled it allows existings subscribers to be updated via the subscribe form and will not throw and Error'
+    REPLACEGROUPSSETTING: 'Replace Groups : If enabled it will replace the interest groups for the subscriber with the groups provided, otherwise we simple add any new groups to the subscriber'
     LISTLABEL: 'Select the list you wish to use',
     SUBSCRIBESUCCESS: 'Enter something to display when a subscription has been sucessful',
     SETTINGSNOTE: 'You must save your changes to display/update the Chimp Fields tab',
