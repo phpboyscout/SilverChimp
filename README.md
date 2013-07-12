@@ -17,9 +17,9 @@ This was created to allow simple mailing list subscription and allowing you to u
 
 ## Installation
 
- * Copy the 'SilverChimp' directory into you main SilverStripe webroot
- * Add the line `SilverChimpSettings::$api_key = '<api-key>';` to mysite/_config.php. (replacing <api-key> with your own key)
- * trigger a build at /dev/build?flush=1
+ * Copy the 'SilverChimp' directory into your main SilverStripe webroot
+ * run `/dev/build?flush=all`
+ * Add your MailChimp API key to the settings tab found under at `/admin/settings/`
  
 ## Usage
  
