@@ -11,19 +11,19 @@ class SilverChimpSubscriptionPage extends Page {
      * Definition of additional data fields required for SilverChimp
      * @var array
      */
-    static $db = array(
-        'ListID'                 => 'Varchar(50)',    // list_unique_id
+    private static $db = array(
+        'ListID'                 => 'Varchar(50)', // list_unique_id
         'SubscribeSuccess'       => 'HTMLText',
-        'DisableGroupSelection'  => 'Boolean',    // prevent frontend selection of groups
-        'AllowUpdateExisting'    => 'Boolean',      // Allow a subscriber to update an existing subscription overrides default in SilverChimpSettings
-        'DefaultGroupSelections' => 'Text',      // serialised array containing default group selections
+        'DisableGroupSelection'  => 'Boolean',     // prevent frontend selection of groups
+        'AllowUpdateExisting'    => 'Boolean',     // Allow a subscriber to update an existing subscription overrides default in SilverChimpSettings
+        'DefaultGroupSelections' => 'Text',        // serialised array containing default group selections
         'SubscribeButtonText'    => 'Text', 
     );
     
-    static $defaults = array(
+    private static $defaults = array(
         "DisableGroupSelection"   => 0,
         "AllowUpdateExisting"     => 0,
-        "DefaultGroupSelections"  => 'a:0:{}',    // use serialize to prevent dependancy for json support 
+        "DefaultGroupSelections"  => 'a:0:{}',     // use serialize to prevent dependancy for json support
         "SubscribeButtonText"     => 'Subscribe',
     );
 
@@ -31,7 +31,7 @@ class SilverChimpSubscriptionPage extends Page {
      * Add SilverShimp Specific fields to administration area
      * @see Page::getCMSFields()
      */
-    function getCMSFields() 
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
         // get api key
@@ -45,7 +45,7 @@ class SilverChimpSubscriptionPage extends Page {
                 $listSource[$l['id']] = $l['name'];
             }
             
-            $settingsTab = 'Root.Content.ChimpSettings';
+            $settingsTab = 'Root.ChimpSettings';
             $fields->findOrMakeTab($settingsTab);
             
             $message = "<p>";
@@ -62,15 +62,10 @@ class SilverChimpSubscriptionPage extends Page {
                 
             ));
             
-            
-            
-            
             if ($this->ListID && strlen($this->ListID)) {
-                
-                
                 // set up fields
                 $mergeVars = $api->listMergeVars($this->ListID);
-                $fieldsTab = 'Root.Content.ChimpFields';
+                $fieldsTab = 'Root.ChimpFields';
                 $fields->findOrMakeTab($fieldsTab);
                 
                 $message = "<p>";
@@ -86,7 +81,7 @@ class SilverChimpSubscriptionPage extends Page {
                 
                 // set up groups
                 $groupData = $api->listInterestGroupings($this->ListID);
-                $groupsTab = 'Root.Content.ChimpGroups';
+                $groupsTab = 'Root.ChimpGroups';
                 $fields->findOrMakeTab($groupsTab);
                 
                 $message = "<p>";
@@ -96,21 +91,23 @@ class SilverChimpSubscriptionPage extends Page {
                 $fields->addFieldsToTab($groupsTab, new LiteralField("ChimpGroupssIntro", $message));
                 
                 $groupDefaults = unserialize($this->DefaultGroupSelections);
-                
-                foreach ($groupData AS $gr) {
-                    $source = array();
-                    foreach ($gr['groups'] as $opt) {
-                        $source[$opt['bit']] = $opt['name'];
+
+                if (is_array($groupData) || $groupData instanceof Traversable) {
+                    foreach ($groupData AS $gr) {
+                        $source = array();
+                        foreach ($gr['groups'] as $opt) {
+                            $source[$opt['bit']] = $opt['name'];
+                        }
+                        $name = 'SCG-' . preg_replace('/[^0-9A-Za-z]/', '-', $gr['name']);
+                        $values = (isset($groupDefaults[$name])) ? $groupDefaults[$name] : null;
+
+                        $displayName = $gr['name'];
+                        if ($gr['form_field'] == 'hidden') {
+                            $displayName .= _t('SilverChimp.HIDDENGROUP', ' (Hidden by MailChimp)');
+                        }
+
+                        $fields->addFieldToTab($groupsTab, new CheckboxSetField($name, $displayName, $source, $values));
                     }
-                    $name = 'SCG-' . preg_replace('/[^0-9A-Za-z]/', '-', $gr['name']);
-                    $values = (isset($groupDefaults[$name])) ? $groupDefaults[$name] : null;
-                    
-                    $displayName = $gr['name'];
-                    if ($gr['form_field'] == 'hidden') {
-                        $displayName .= _t('SilverChimp.HIDDENGROUP', ' (Hidden by MailChimp)');
-                    }
-                    
-                    $fields->addFieldToTab($groupsTab, new CheckboxSetField($name, $displayName, $source, $values));
                 }
             }
     
@@ -155,6 +152,12 @@ class SilverChimpSubscriptionPage extends Page {
  */
 class SilverChimpSubscriptionPage_Controller extends Page_Controller {
 
+    public static $allowed_actions = array(
+        // someaction can be accessed by anyone, any time
+        'Form',
+        'SubscribeAction'
+    );
+
     /**
      * The MailChimp API wrapper
      * @var MCAPI
@@ -186,34 +189,38 @@ class SilverChimpSubscriptionPage_Controller extends Page_Controller {
         $required = array();
         
         // loop through and add merge variables
-        foreach ($mergeVars AS $var) {
-            if ($new = $this->buildField($var)) {
-                if (is_array($new)) {
-                    $fields = array_merge($fields, $new);
-                } else {
-                    $fields[] = $new;
+        if (is_array($mergeVars) || $mergeVars instanceof Traversable) {
+            foreach ($mergeVars AS $var) {
+                if ($new = $this->buildField($var)) {
+                    if (is_array($new)) {
+                        $fields = array_merge($fields, $new);
+                    } else {
+                        $fields[] = $new;
+                    }
+
+                    if ($var['req']) {
+                        $required[] = $var['tag'];
+                    }
+
                 }
-                
-                if ($var['req']) {
-                    $required[] = $var['tag'];
-                }
-                
             }
         }
         
         // if group selection allowed on frontend loop through and add
         if (false == $this->DisableGroupSelection) {
             $groupData = $this->api->listInterestGroupings($this->ListID);
-            foreach ($groupData AS $gr) {
-                if ($new = $this->buildGroupField($gr)) {
-                    $fields[] = $new;
+            if (is_array($groupData) || $groupData instanceof Traversable) {
+                foreach ($groupData AS $gr) {
+                    if ($new = $this->buildGroupField($gr)) {
+                        $fields[] = $new;
+                    }
                 }
             }
         }
         
         $form = new Form($this, 'Form',
-            new FieldSet($fields),
-            new FieldSet(new FormAction('SubscribeAction', $this->SubscribeButtonText)),
+            new FieldList($fields),
+            new FieldList(new FormAction('SubscribeAction', $this->SubscribeButtonText)),
             new RequiredFields($required)
         );
 
@@ -259,43 +266,45 @@ class SilverChimpSubscriptionPage_Controller extends Page_Controller {
         
         // get all defaults for list
         $groupDefaults = unserialize($this->DefaultGroupSelections);
-        
+
+        if (is_array($groupData) || $groupData instanceof Traversable) {
         // loop through groups
-        foreach ($groupData AS $gr) {
-            // initialise valiable containing the key for defaults test
-            $defaultsName = 'SCG-' . preg_replace('/[^0-9A-Za-z]/', '-', $gr['name']);
-            
-            // if a GROUPINGS value for the current group exists
-            if (isset($data['GROUPINGS'][$gr['name']])) {
-                $newGroups = array();
-                // check current group is in submitted values
-                foreach ($gr['groups'] AS $gd) {
-                    if (in_array($gd['bit'], $data['GROUPINGS'][$gr['name']])) {
-                        $newGroups[] = $gd['name'];
+            foreach ($groupData AS $gr) {
+                // initialise valiable containing the key for defaults test
+                $defaultsName = 'SCG-' . preg_replace('/[^0-9A-Za-z]/', '-', $gr['name']);
+
+                // if a GROUPINGS value for the current group exists
+                if (isset($data['GROUPINGS'][$gr['name']])) {
+                    $newGroups = array();
+                    // check current group is in submitted values
+                    foreach ($gr['groups'] AS $gd) {
+                        if (in_array($gd['bit'], $data['GROUPINGS'][$gr['name']])) {
+                            $newGroups[] = $gd['name'];
+                        }
                     }
-                }
-                
-                // add groups to data for subscription
-                $postedVars['GROUPINGS'][] = array(
-                    'name' => $gr['name'],
-                    'groups' => implode(',',$newGroups),
-                );
-                
-                
-            } else if (isset($groupDefaults[$defaultsName])) { // if defaults present
-                $newGroups = array();
-                // loop through groups and check in defaults 
-                foreach ($gr['groups'] AS $gd) {
-                    if (in_array($gd['bit'], $groupDefaults[$defaultsName])) {
-                        $newGroups[] = $gd['name'];
+
+                    // add groups to data for subscription
+                    $postedVars['GROUPINGS'][] = array(
+                        'name' => $gr['name'],
+                        'groups' => implode(',',$newGroups),
+                    );
+
+
+                } else if (isset($groupDefaults[$defaultsName])) { // if defaults present
+                    $newGroups = array();
+                    // loop through groups and check in defaults
+                    foreach ($gr['groups'] AS $gd) {
+                        if (in_array($gd['bit'], $groupDefaults[$defaultsName])) {
+                            $newGroups[] = $gd['name'];
+                        }
                     }
+
+                    // add groups to data for subscription
+                    $postedVars['GROUPINGS'][] = array(
+                        'name' => $gr['name'],
+                        'groups' => implode(',',$newGroups),
+                    );
                 }
-                
-                // add groups to data for subscription
-                $postedVars['GROUPINGS'][] = array(
-                    'name' => $gr['name'],
-                    'groups' => implode(',',$newGroups),
-                );
             }
         }
         $this->extend('updateSilverChimpSignupAction', $data, $postedVars);

@@ -13,7 +13,7 @@ This was created to allow simple mailing list subscription and allowing you to u
     
 ## Requirements
 
- * Silverstripe 2.4 or newer
+ * Silverstripe 3.1 or newer
 
 ## Installation
 
