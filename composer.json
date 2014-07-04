@@ -1,5 +1,5 @@
 {
-    "name": "zucchi/silvershimp",
+    "name": "zucchi/silverchimp",
     "description": "Simple MailChimp Integration for SilverStripe",
     "type": "silverstripe-module",
     "keywords" : ["silverstripe", "mailchimp"],
