@@ -137,15 +137,17 @@ class SilverChimpSubscriptionPage extends Page {
             // get list of grroups
             $groupData = $api->listInterestGroupings($this->ListID);
             // loop
-            foreach ($groupData AS $gr) {
-                // evaluate the field name used
-                $name = 'SCG-' . preg_replace('/[^0-9A-Za-z]/', '-', $gr['name']);
-                // get field value && set into defaults array
-                if (isset($_REQUEST[$name])) {
-                    $defaults[$name] = $_REQUEST[$name]; 
+            if ($groupData && !empty($groupData)) {
+                foreach ($groupData AS $gr) {
+                    // evaluate the field name used
+                    $name = 'SCG-' . preg_replace('/[^0-9A-Za-z]/', '-', $gr['name']);
+                    // get field value && set into defaults array
+                    if (isset($_REQUEST[$name])) {
+                        $defaults[$name] = $_REQUEST[$name]; 
+                    }
                 }
+                $this->DefaultGroupSelections = serialize($defaults);
             }
-            $this->DefaultGroupSelections = serialize($defaults);
         }
         parent::onBeforeWrite();
     }
