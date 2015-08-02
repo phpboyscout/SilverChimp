@@ -1,5 +1,5 @@
 {
-    "name": "zucchi/silverchimp",
+    "name": "phpboyscout/silverchimp",
     "description": "Simple MailChimp Integration for SilverStripe",
     "type": "silverstripe-module",
     "keywords" : ["silverstripe", "mailchimp"],
@@ -7,16 +7,16 @@
     "authors": [
         {
             "name": "Matt Cockayne",
-            "email": "matt@zucchi.co.uk",
-            "homepage": "http://zucchi.co.uk",
+            "email": "matt@phpboyscout.uk",
+            "homepage": "http://phpboyscout.uk",
             "role": "Developer"
         }
     ],
     "support": {
-        "email": "dev@zucchi.co.uk",
-        "issues": "https://github.com/zucchi/SilverChimp/issues",
-        "wiki": "https://github.com/zucchi/SilverChimp/wiki",
-        "source": "https://github.com/zucchi/SilverChimp"
+        "email": "dev@phpboyscout.uk",
+        "issues": "https://github.com/phpboyscout/SilverChimp/issues",
+        "wiki": "https://github.com/phpboyscout/SilverChimp/wiki",
+        "source": "https://github.com/phpboyscout/SilverChimp"
     },
     "require": {
 	  "silverstripe/framework": "3.*",
